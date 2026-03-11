@@ -1,4 +1,4 @@
-const CACHE = "lotto-super-v7"; // 배포할 때마다 v를 올리세요
+const CACHE = "lotto-super-v8"; // 배포할 때마다 v를 올리세요
 const ASSETS = [
   "./",
   "./index.html",
