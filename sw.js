@@ -1,4 +1,4 @@
-const CACHE = "lotto-pwa-v11"; // 배포할 때마다 v만 올리세요
+const CACHE = "lotto-pwa-v12"; // 배포할 때마다 v만 올리세요
 const ASSETS = [
   "./",
   "./index.html",
