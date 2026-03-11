@@ -5,63 +5,80 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
 
+  <!-- iOS 홈화면(PWA) 느낌 강화 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="로또번호 생성기">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <!-- 아이콘이 없으면 iOS는 화면 스냅샷을 아이콘으로 쓸 수 있어요 -->
+  <!-- <link rel="apple-touch-icon" href="./apple-touch-icon.png"> -->
 
   <link rel="manifest" href="./manifest.webmanifest" />
   <title>로또번호 생성기</title>
 
   <style>
     :root{
-      --bg:#070b18;
-      --bg2:#0b1220;
+      --bg0:#060913;
+      --bg1:#0b1220;
       --card: rgba(255,255,255,.06);
       --card2: rgba(255,255,255,.08);
       --line: rgba(255,255,255,.12);
       --text:#eaf0ff;
       --muted:#a8b3d6;
+
       --accent:#79a7ff;
       --good:#43d49f;
       --warn:#ffd166;
       --bad:#ff5a7a;
-      --shadow: 0 16px 40px rgba(0,0,0,.35);
+
+      --shadow: 0 18px 44px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Apple SD Gothic Neo,Noto Sans KR,sans-serif;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
       color:var(--text);
       background:
         radial-gradient(900px 600px at 10% 0%, rgba(121,167,255,.18), transparent 60%),
         radial-gradient(900px 600px at 100% 10%, rgba(67,212,159,.12), transparent 55%),
-        linear-gradient(180deg, var(--bg), var(--bg2));
+        linear-gradient(180deg, var(--bg0), var(--bg1));
       min-height:100vh;
     }
 
     header{
-      position:sticky; top:0; z-index:20;
+      position:sticky; top:0; z-index:30;
       padding:14px 16px 12px;
-      background: linear-gradient(180deg, rgba(7,11,24,.92), rgba(7,11,24,.55));
+      background: linear-gradient(180deg, rgba(6,9,19,.92), rgba(6,9,19,.55));
       backdrop-filter: blur(14px);
       border-bottom:1px solid var(--line);
     }
-    .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
     h1{margin:0; font-size:18px; letter-spacing:-.2px}
-    .sub{margin-top:6px; font-size:12px; color:var(--muted); display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
-
+    .rightBtns{display:flex; gap:8px; align-items:center;}
+    .sub{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
     .badge{
       display:inline-flex; align-items:center; gap:8px;
-      padding:6px 10px; border-radius:999px;
+      padding:6px 10px;
+      border-radius:999px;
       border:1px solid var(--line);
       background: rgba(255,255,255,.05);
-      font-size:12px; color:var(--muted);
+      font-size:12px;
+      color:var(--muted);
     }
     .dot{width:8px; height:8px; border-radius:999px; background:var(--good)}
     .dot.off{background:var(--bad)}
 
-    .wrap{max-width:940px; margin:0 auto; padding:14px 16px 44px;}
-    .grid{display:grid; grid-template-columns: 1fr; gap:12px;}
+    .wrap{max-width:980px; margin:0 auto; padding:14px 16px 120px;}
+    .grid{display:grid; grid-template-columns:1fr; gap:12px;}
     @media (min-width: 920px){
       .grid.two{grid-template-columns: 420px 1fr; align-items:start;}
     }
@@ -76,12 +93,17 @@
     .cardHd{
       padding:14px 14px 10px;
       border-bottom:1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), transparent);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
     }
-    .cardHd .ttl{font-weight:900}
-    .cardHd .desc{margin-top:6px; color:var(--muted); font-size:12px; line-height:1.5}
-
+    .ttl{font-weight:950}
+    .desc{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.55;
+    }
     .cardBd{padding:14px;}
+
     .row{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;}
     label{font-size:12px; color:var(--muted);}
     input, select{
@@ -102,26 +124,20 @@
       color: var(--text);
       padding:11px 14px;
       border-radius:12px;
-      font-weight:900;
+      font-weight:950;
       cursor:pointer;
       transition: transform .06s ease;
+      box-shadow: 0 10px 22px rgba(0,0,0,.22);
     }
-    .btn:active{transform: scale(.98)}
+    @media (hover:hover){
+      .btn:hover{ transform: translateY(-1px); }
+    }
+    .btn:active{ transform: translateY(0) scale(.98) }
     .btn.primary{background: linear-gradient(135deg, var(--accent), rgba(121,167,255,.65)); border-color:transparent; color:#081227}
     .btn.good{background: linear-gradient(135deg, var(--good), rgba(67,212,159,.65)); border-color:transparent; color:#052016}
     .btn.warn{background: linear-gradient(135deg, var(--warn), rgba(255,209,102,.65)); border-color:transparent; color:#1b1400}
     .btn.ghost{background: transparent}
     .btn.full{width:100%}
-
-    .tabs{display:flex; gap:8px; flex-wrap:wrap;}
-    .tab{
-      padding:9px 12px; border-radius:999px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: var(--muted);
-      font-weight:900; cursor:pointer;
-    }
-    .tab.on{background: rgba(121,167,255,.18); color: var(--text); border-color: rgba(121,167,255,.35)}
 
     .pill{
       display:inline-flex; align-items:center; gap:8px;
@@ -132,7 +148,19 @@
       color: var(--muted);
       font-size:12px;
     }
+    a{color: var(--accent); text-decoration:none}
+
     .hidden{display:none !important;}
+
+    .tabs{display:flex; gap:8px; flex-wrap:wrap;}
+    .tab{
+      padding:9px 12px; border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      font-weight:950; cursor:pointer;
+    }
+    .tab.on{background: rgba(121,167,255,.18); color: var(--text); border-color: rgba(121,167,255,.35)}
 
     .results{display:grid; gap:10px;}
     .item{
@@ -142,7 +170,7 @@
       padding:12px;
     }
     .itemTop{display:flex; justify-content:space-between; gap:10px; align-items:flex-start; flex-wrap:wrap;}
-    .itemTitle{font-weight:900}
+    .itemTitle{font-weight:950}
     .itemMeta{color:var(--muted); font-size:12px; margin-top:4px; line-height:1.45}
     .actions{display:flex; gap:8px; flex-wrap:wrap;}
     .iconBtn{
@@ -151,20 +179,8 @@
       color: var(--text);
       padding:8px 10px;
       border-radius:12px;
-      font-weight:900;
+      font-weight:950;
       cursor:pointer;
-    }
-
-    .balls{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
-    .ball{
-      width:40px; height:40px; border-radius:999px;
-      display:flex; align-items:center; justify-content:center;
-      font-weight:1000;
-      border:1px solid rgba(255,255,255,.10);
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.20), rgba(255,255,255,.04));
-    }
-    @media (min-width: 920px){
-      .ball{width:44px; height:44px; font-size:16px}
     }
 
     .analysis{
@@ -179,82 +195,40 @@
     }
     .analysis b{color:var(--text)}
 
-    /* 업데이트 배너 */
-    .updateBar{
-      position: sticky;
-      top: 58px;
-      z-index: 19;
-      margin: 10px 0 0;
-      border: 1px solid rgba(255,255,255,.14);
-      background: linear-gradient(135deg, rgba(255,209,102,.18), rgba(121,167,255,.14));
-      border-radius: 14px;
+    /* 하단 고정 바 (최신버전 적용) */
+    .bottomBar{
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(6,9,19,0), rgba(6,9,19,.88) 30%, rgba(6,9,19,.96));
+      backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,.10);
+      z-index: 999;
+    }
+    .bottomBarInner{
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
       padding: 10px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
       box-shadow: var(--shadow);
     }
-    .updateTxt{font-size:12px; color:var(--text); font-weight:900; line-height:1.4}
-    .updateTxt span{display:block; color:var(--muted); font-weight:700}
-    a{color: var(--accent); text-decoration:none}
-    /* 하단 바가 콘텐츠를 가리지 않도록 여백 확보 */
-.wrap{
-  padding-bottom: 110px; /* bottomBar 높이만큼 */
-}
-
-/* 하단 고정 바 */
-.bottomBar{
-  position: fixed;
-  left: 0; right: 0; bottom: 0;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); /* iPhone 홈바 영역 */
-  background: linear-gradient(180deg, rgba(7,11,24,0), rgba(7,11,24,.88) 30%, rgba(7,11,24,.96));
-  backdrop-filter: blur(14px);
-  border-top: 1px solid rgba(255,255,255,.10);
-  z-index: 999;
-}
-
-.bottomBarInner{
-  max-width: 940px;
-  margin: 0 auto;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.06);
-  box-shadow: 0 18px 40px rgba(0,0,0,.35);
-}
-
-.bottomBarText{
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.bottomBarText b{
-  font-size: 13px;
-  letter-spacing: -0.2px;
-}
-.bottomBarText span{
-  font-size: 12px;
-  color: rgba(232,240,255,.68);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 버튼 살짝 고급스럽게 */
-.btn{
-  box-shadow: 0 10px 22px rgba(0,0,0,.22);
-}
-@media (hover:hover){
-  .btn:hover{ transform: translateY(-1px); }
-}
-.btn:active{ transform: translateY(0) scale(.98); }
-
+    .bottomBarText{
+      display:flex; flex-direction:column; gap:3px; min-width:0;
+    }
+    .bottomBarText b{font-size:13px; letter-spacing:-.2px}
+    .bottomBarText span{
+      font-size:12px;
+      color: rgba(232,240,255,.68);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   </style>
 </head>
 
@@ -262,25 +236,19 @@
 <header>
   <div class="topbar">
     <h1 id="appTitle">번호 생성기</h1>
-    <button class="btn ghost" onclick="showHome()">처음</button>
+    <div class="rightBtns">
+      <button class="btn ghost hidden" id="btnBack" onclick="goBack()">뒤로</button>
+      <button class="btn ghost" onclick="setView('home')">처음</button>
+    </div>
   </div>
 
   <div class="sub">
     <div class="badge" id="netBadge"><span class="dot" id="netDot"></span><span id="netText">Online</span></div>
     <span id="subtitle">오프라인에서도 동작하는 생성기</span>
   </div>
-
-  <div id="updateBar" class="updateBar hidden">
-    <div class="updateTxt">
-      새 버전이 있어요
-      <span>버튼을 누르면 최신 화면으로 새로고침됩니다.</span>
-    </div>
-    <button class="btn warn" id="btnUpdateNow">업데이트 적용</button>
-  </div>
 </header>
 
 <div class="wrap">
-
   <!-- HOME -->
   <section id="viewHome" class="grid">
     <div class="card">
@@ -290,30 +258,31 @@
       </div>
       <div class="cardBd">
         <div class="row" style="align-items:stretch">
-          <button class="btn primary full" onclick="selectMode('lotto')">로또번호 생성기 (6/45)</button>
-          <button class="btn full" onclick="selectMode('pension')">연금복권720+ 생성기</button>
-          <button class="btn good full" onclick="selectMode('history')">기록 / 즐겨찾기</button>
+          <button class="btn primary full" onclick="setView('lotto')">로또번호 생성기 (6/45)</button>
+          <button class="btn full" onclick="setView('pension')">연금복권720+ 생성기</button>
+          <button class="btn good full" onclick="setView('history')">기록 / 즐겨찾기</button>
         </div>
 
-        <div style="margin-top:12px" class="pill">
-          오프라인에서도 사용가능합니다. 다만 최신 버전은 온라인 상태에서 2~3회 새로고침 해야합니다.
+        <div style="margin-top:12px" class="analysis">
+          <b>오프라인 사용 팁</b><br/>
+          처음 1~2번은 온라인에서 열어 캐시를 채우면, 이후 비행기 모드에서도 열립니다.
         </div>
 
-                
-        </p>
+        <div style="margin-top:12px" class="desc">
+          연금복권720+ 번호 형식은 “1조 000000 ~ 5조 999999” 입니다. <a href="https://www.dhlottery.co.kr/pt720/intro" target="_blank">공식 안내</a> [Source](https://www.dhlottery.co.kr/pt720/intro)
+        </div>
       </div>
     </div>
 
     <div class="card">
       <div class="cardHd">
-        <div class="ttl">오프라인 사용 팁</div>
-        <div class="desc">처음 1~2번은 온라인에서 열어 캐시를 채우면, 이후 비행기 모드에서도 열립니다.</div>
+        <div class="ttl">알림</div>
+        <div class="desc">생성 화면은 깔끔하게 유지되고, 결과는 기록/즐겨찾기에만 저장됩니다.</div>
       </div>
       <div class="cardBd">
         <div class="analysis">
-          <b>오프라인에서도 되는 것</b><br/>
-          • 번호 생성 • 기록/즐겨찾기 조회 • 이미지 공유 카드 생성(기기 내부) • 백업/복원(JSON)<br/>
-          <span style="color:var(--muted)">* 단, “앱 업데이트 반영”은 온라인이 필요합니다.</span>
+          <b>중요</b><br/>
+          로또/연금복권 추첨은 독립 사건이므로 과거 출현이 다음 당첨을 보장하지 않습니다. (재미용 생성기)
         </div>
       </div>
     </div>
@@ -353,14 +322,14 @@
           <button class="btn" onclick="copyLastText()">텍스트 복사</button>
         </div>
 
-        <div style="margin-top:10px" class="pill">생성하면 자동으로 “로또 기록”에 저장됩니다</div>
+        <div style="margin-top:12px" class="pill">생성 결과는 “로또 기록”에 저장됩니다</div>
       </div>
     </div>
 
     <div class="card">
       <div class="cardHd">
-        <div class="ttl">결과</div>
-        <div class="desc">각 항목에서 ★즐겨찾기 / 이미지공유 / 삭제가 가능합니다.</div>
+        <div class="ttl">생성 결과</div>
+        <div class="desc">이 화면은 생성 후 자동으로 초기화(번호를 남기지 않음)됩니다.</div>
       </div>
       <div class="cardBd">
         <div id="resultsLotto" class="results"></div>
@@ -400,10 +369,7 @@
 
         <div style="margin-top:12px" class="analysis">
           <b>조 전략 템플릿</b><br/>
-          • 랜덤조: 매번 1~5조 무작위<br/>
-          • 조 고정: 선택한 조로만 생성<br/>
-          • 1~5조 균등분배: 여러 장 뽑을 때 조가 골고루 섞이게 생성<br/>
-          • 선택조 랜덤: 체크한 조 중에서만 랜덤
+          • 랜덤조 · • 조 고정 · • 1~5조 균등분배 · • 선택조 랜덤
         </div>
 
         <div class="row" style="margin-top:10px; align-items:stretch">
@@ -425,14 +391,14 @@
           <button class="btn" onclick="copyLastText()">텍스트 복사</button>
         </div>
 
-        <div style="margin-top:10px" class="pill">생성하면 자동으로 “연금 기록”에 저장됩니다</div>
+        <div style="margin-top:12px" class="pill">생성 결과는 “연금 기록”에 저장됩니다</div>
       </div>
     </div>
 
     <div class="card">
       <div class="cardHd">
-        <div class="ttl">결과</div>
-        <div class="desc">★즐겨찾기 / 이미지공유 / 삭제 가능</div>
+        <div class="ttl">생성 결과</div>
+        <div class="desc">이 화면은 생성 후 자동으로 초기화(번호를 남기지 않음)됩니다.</div>
       </div>
       <div class="cardBd">
         <div id="resultsPension" class="results"></div>
@@ -463,9 +429,9 @@
         </div>
 
         <div class="analysis" style="margin-top:12px">
-          <b>팁</b><br/>
-          • 서버/로그인 없이도 “내보내기 파일”만 보관하면 폰 바꿔도 복원 가능합니다.<br/>
-          • 오프라인에서도 내보내기/가져오기 동작합니다(파일 선택만 기기 기능).
+          <b>이미지 공유</b><br/>
+          모바일에서는 공유 시트가 뜨고, PC에서는 PNG 다운로드로 동작할 수 있어요.
+          (Web Share API 지원 여부에 따라 다름) [Source](https://developer.mozilla.org/en-US/docs/Web/API/Web_Share_API)
         </div>
       </div>
     </div>
@@ -473,80 +439,50 @@
     <div class="card">
       <div class="cardHd">
         <div class="ttl">목록</div>
-        <div class="desc">항목별로 ★/이미지공유/삭제 가능</div>
+        <div class="desc">항목별 ★/이미지공유/삭제 가능</div>
       </div>
       <div class="cardBd">
         <div id="historyList" class="results"></div>
       </div>
     </div>
   </section>
+</div>
 
+<!-- 항상 보이는 하단 바 -->
+<div class="bottomBar">
+  <div class="bottomBarInner">
+    <div class="bottomBarText">
+      <b>최신버전 적용</b>
+      <span>업데이트가 안 보일 때 눌러주세요 (온라인 권장)</span>
+    </div>
+    <button class="btn warn" onclick="forceHardRefresh()">최신버전 적용</button>
+  </div>
 </div>
 
 <script>
-  // =========================
-  // 업데이트 안내(새로고침 버튼)
-  // =========================
-  let swReg = null;
+  // ===== 공통 상태 =====
+  const state = {
+    view: 'home',
+    lastText: '',
+    historyTab: 'lotto',
+  };
 
-  function showUpdateBar(show){
-    document.getElementById('updateBar').classList.toggle('hidden', !show);
+  // UUID (Safari 호환 fallback)
+  function uuid(){
+    if (crypto?.randomUUID) return crypto.randomUUID();
+    const s = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('');
+    return `${s.slice(0,8)}-${s.slice(8,12)}-${s.slice(12,16)}-${s.slice(16,20)}-${s.slice(20)}`;
   }
 
-  function setupServiceWorkerUpdateUI(){
-    const btn = document.getElementById('btnUpdateNow');
-    btn.addEventListener('click', () => {
-      if(!swReg) return;
-
-      // waiting 중인 SW에게 즉시 활성화 요청
-      if(swReg.waiting){
-        swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
-      }
-    });
-async function forceHardRefresh(){
-  const ok = confirm(
-    "최신 버전을 강제로 다시 받아옵니다.\n\n" +
-    "• 오프라인 캐시가 새로 채워질 수 있어요\n" +
-    "• 인터넷 연결 상태에서 실행을 권장합니다\n\n" +
-    "지금 적용할까요?"
-  );
-  if(!ok) return;
-
-  try{
-    // 1) 서비스워커 업데이트 체크
-    if('serviceWorker' in navigator){
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(r => r.update().catch(()=>{})));
-
-      // 2) 혹시 waiting(대기중인 새 버전)이 있으면 즉시 활성화 시도
-      regs.forEach(r => {
-        if(r.waiting) r.waiting.postMessage({ type:'SKIP_WAITING' });
-      });
-    }
-
-    // 3) 캐시 스토리지(오프라인 캐시) 삭제
-    if('caches' in window){
-      const keys = await caches.keys();
-      await Promise.all(keys.map(k => caches.delete(k)));
-    }
-  }catch(e){
-    // 실패해도 아래 단계로 진행
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  function clampInt(v,min,max,fallback){
+    const n = parseInt(v,10);
+    if(Number.isNaN(n)) return fallback;
+    return Math.max(min, Math.min(max, n));
   }
+  function nowISO(){ return new Date().toISOString(); }
 
-  // 4) 캐시 무시용 쿼리로 강제 재진입 (서비스워커/브라우저 캐시 우회)
-  const base = location.origin + location.pathname; // 쿼리/해시 제거
-  location.replace(base + "?t=" + Date.now());
-}
-
-    // 새 SW가 활성화되면 자동 새로고침
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
-    });
-  }
-
-  // =========================
-  // 네트워크(오프라인 강조)
-  // =========================
+  // ===== 네트워크 배지(오프라인 강조) =====
   function updateNetworkBadge(){
     const online = navigator.onLine;
     document.getElementById('netDot').classList.toggle('off', !online);
@@ -555,14 +491,10 @@ async function forceHardRefresh(){
   window.addEventListener('online', updateNetworkBadge);
   window.addEventListener('offline', updateNetworkBadge);
 
-  // =========================
-  // 화면 전환
-  // =========================
-  const state = {
-    view: 'home',
-    lastText: '',
-    historyTab: 'lotto',
-  };
+  // ===== 화면 전환 + 뒤로가기(History API) =====
+  function updateBackButton(){
+    document.getElementById('btnBack').classList.toggle('hidden', state.view === 'home');
+  }
 
   function setTitle(t, sub){
     document.getElementById('appTitle').textContent = t;
@@ -576,40 +508,48 @@ async function forceHardRefresh(){
     document.getElementById(id).classList.remove('hidden');
   }
 
-  function showHome(){
-    state.view='home';
-    setTitle('번호 생성기', '오프라인에서도 동작하는 생성기');
-    showOnly('viewHome');
-  }
-  function selectMode(mode){
-    if(mode==='lotto'){
-      state.view='lotto';
-      setTitle('로또번호 생성기', '가중치/혼합/랜덤 + 분석 카드');
+  function setView(view, {push=true} = {}){
+    state.view = view;
+
+    if(view === 'home'){
+      setTitle('번호 생성기', '오프라인에서도 동작하는 생성기');
+      showOnly('viewHome');
+    } else if(view === 'lotto'){
+      setTitle('로또번호 생성기', '가중치/혼합/랜덤 (결과는 기록에만 저장)');
       showOnly('viewLotto');
       onLottoModeChanged();
-      return;
-    }
-    if(mode==='pension'){
-      state.view='pension';
-      setTitle('연금복권720+ 생성기', '조 전략 템플릿 + 이미지 공유');
+      // 생성 페이지는 항상 깔끔하게
+      renderEmptyNotice('resultsLotto', '왼쪽에서 “생성”을 누르면 기록에 저장됩니다.');
+    } else if(view === 'pension'){
+      setTitle('연금복권720+ 생성기', '조 전략 템플릿 (결과는 기록에만 저장)');
       showOnly('viewPension');
-      return;
-    }
-    if(mode==='history'){
-      state.view='history';
+      renderEmptyNotice('resultsPension', '왼쪽에서 템플릿 버튼을 누르면 기록에 저장됩니다.');
+    } else if(view === 'history'){
       setTitle('기록 / 즐겨찾기', '로또/연금 탭 분리 + 백업/복원');
       showOnly('viewHistory');
       renderHistory();
-      return;
+    }
+
+    updateBackButton();
+
+    if(push){
+      history.pushState({view}, '', '#'+view);
     }
   }
 
-  // =========================
-  // 데이터 저장(기록/즐겨찾기/백업)
-  // =========================
+  function goBack(){
+    history.back();
+  }
+
+  window.addEventListener('popstate', (e) => {
+    const v = (e.state && e.state.view) ? e.state.view : (location.hash.replace('#','') || 'home');
+    setView(v, {push:false});
+  });
+
+  // ===== 로컬 저장(기록/즐겨찾기) =====
   const KEY = {
-    lotto: 'hist_lotto_v1',
-    pension: 'hist_pension_v1'
+    lotto: 'hist_lotto_v2',
+    pension: 'hist_pension_v2'
   };
 
   function loadArr(key){
@@ -618,13 +558,12 @@ async function forceHardRefresh(){
   function saveArr(key, arr){
     localStorage.setItem(key, JSON.stringify(arr));
   }
-  function nowISO(){ return new Date().toISOString(); }
 
   function pushHistory(type, payload){
     const key = (type==='lotto') ? KEY.lotto : KEY.pension;
     const arr = loadArr(key);
-    arr.unshift(payload); // 최신이 위
-    saveArr(key, arr.slice(0, 300)); // 너무 커지는 것 방지
+    arr.unshift(payload);
+    saveArr(key, arr.slice(0, 300));
   }
 
   function toggleFav(type, id){
@@ -634,7 +573,6 @@ async function forceHardRefresh(){
     if(i<0) return;
     arr[i].fav = !arr[i].fav;
     saveArr(key, arr);
-    rerenderCurrent(type);
     if(state.view==='history') renderHistory();
   }
 
@@ -643,34 +581,52 @@ async function forceHardRefresh(){
     let arr = loadArr(key);
     arr = arr.filter(x=>x.id!==id);
     saveArr(key, arr);
-    rerenderCurrent(type);
     if(state.view==='history') renderHistory();
   }
 
-  function rerenderCurrent(type){
-    if(type==='lotto' && state.view==='lotto') {
-      // 현재 화면 결과는 “방금 생성한 리스트”만 보여주고 있으므로 history 재렌더는 history 화면에서
-      return;
-    }
-    if(type==='pension' && state.view==='pension') return;
+  // ===== 생성 페이지는 결과를 남기지 않음(저장 완료/빈 안내만) =====
+  function renderEmptyNotice(targetId, msg){
+    const box = document.getElementById(targetId);
+    box.innerHTML = `
+      <div class="item">
+        <div class="itemTitle">생성 화면</div>
+        <div class="itemMeta">${msg}</div>
+        <div class="analysis" style="margin-top:10px">
+          생성된 번호는 <b>기록/즐겨찾기</b>에서 확인/공유할 수 있어요.
+        </div>
+      </div>
+    `;
   }
 
-  // =========================
-  // 로또: 핫넘버 가중치 (Lottolyzer TOP15)
-  // =========================
-  // [Source] https://kr.lottolyzer.com/home/south-korea/6_slash_45-lotto/summary-view
+  function renderSavedNotice(targetId, msg, tab){
+    const box = document.getElementById(targetId);
+    box.innerHTML = `
+      <div class="item">
+        <div class="itemTitle">저장 완료</div>
+        <div class="itemMeta">${msg}</div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn good" onclick="openHistoryTab('${tab}')">기록에서 보기</button>
+          <button class="btn" onclick="copyLastText()">방금 결과 텍스트 복사</button>
+        </div>
+        <div class="analysis" style="margin-top:10px">
+          생성 결과는 기록에 저장되었고, 생성 페이지는 깔끔하게 유지됩니다.
+        </div>
+      </div>
+    `;
+  }
+
+  function openHistoryTab(tab){
+    setView('history');
+    setHistoryTab(tab);
+  }
+
+  // ===== 로또: 핫넘버 가중치 =====
+  // Lottolyzer TOP15 출현횟수 표 내장 [Source](https://kr.lottolyzer.com/home/south-korea/6_slash_45-lotto/summary-view)
   const HOT_COUNTS = new Map([
     [12,147],[34,143],[38,142],[27,141],[13,141],
     [33,137],[45,137],[18,134],[16,133],[15,132],
     [7,132],[14,132],[17,131],[20,131],[1,130]
   ]);
-
-  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-  function clampInt(v,min,max,fallback){
-    const n = parseInt(v,10);
-    if(Number.isNaN(n)) return fallback;
-    return Math.max(min, Math.min(max, n));
-  }
 
   function getWeight(num){
     if(!HOT_COUNTS.has(num)) return 1;
@@ -679,8 +635,8 @@ async function forceHardRefresh(){
     const max = Math.max(...counts);
     const c = HOT_COUNTS.get(num);
     if(max===min) return 5;
-    const t = (c-min)/(max-min); // 0~1
-    return 1 + t*4;             // 1~5
+    const t = (c-min)/(max-min);
+    return 1 + t*4; // 1~5
   }
 
   function weightedPickOne(availableNums){
@@ -741,43 +697,6 @@ async function forceHardRefresh(){
     return {sum, odd, even, low, mid, high, consecutive, hotIn};
   }
 
-  function renderLottoResults(entries){
-    const box = document.getElementById('resultsLotto');
-    box.innerHTML = '';
-    if(!entries.length){
-      box.innerHTML = `<div class="item"><div class="itemTitle">아직 결과가 없어요</div><div class="itemMeta">왼쪽에서 “생성”을 눌러주세요.</div></div>`;
-      return;
-    }
-
-    entries.forEach(e=>{
-      const a = analyzeLotto(e.nums);
-      const favTxt = e.fav ? '★' : '☆';
-
-      const el = document.createElement('div');
-      el.className = 'item';
-      el.innerHTML = `
-        <div class="itemTop">
-          <div>
-            <div class="itemTitle">${e.label} · ${e.nums.join(', ')}</div>
-            <div class="itemMeta">${new Date(e.ts).toLocaleString()} · 모드: <b>${e.modeLabel}</b></div>
-          </div>
-          <div class="actions">
-            <button class="iconBtn" onclick="toggleFav('lotto','${e.id}')">${favTxt} 저장</button>
-            <button class="iconBtn" onclick="shareAsImage('lotto','${e.id}')">이미지 공유</button>
-            <button class="iconBtn" onclick="deleteItem('lotto','${e.id}')">삭제</button>
-          </div>
-        </div>
-        <div class="balls">${e.nums.map(n=>`<div class="ball">${n}</div>`).join('')}</div>
-        <div class="analysis">
-          <b>번호 분석</b><br/>
-          합계 <b>${a.sum}</b> · 홀/짝 <b>${a.odd}:${a.even}</b> · 구간(1~15/16~30/31~45) <b>${a.low}/${a.mid}/${a.high}</b><br/>
-          연속수 <b>${a.consecutive ? '포함' : '없음'}</b> · 핫넘버 포함 <b>${a.hotIn}개</b>
-        </div>
-      `;
-      box.appendChild(el);
-    });
-  }
-
   function generateLotto(){
     const count = clampInt(document.getElementById('lottoCount').value, 1, 20, 5);
     const mode = document.getElementById('lottoMode').value;
@@ -789,62 +708,28 @@ async function forceHardRefresh(){
     for(let i=0;i<count;i++){
       const nums = generateLottoOneSet(mode, mixHotCount);
       const entry = {
-        id: crypto.randomUUID(),
+        id: uuid(),
         type: 'lotto',
         ts: nowISO(),
         nums,
-        mode, modeLabel,
-        fav: false,
-        label: `${i+1}게임`
+        modeLabel,
+        fav: false
       };
       pushHistory('lotto', entry);
       entries.push(entry);
     }
 
     state.lastText = entries.map((e,i)=>`${i+1}) ${e.nums.join(', ')}`).join('\n');
-    renderLottoResults(entries);
+
+    // 생성 화면에는 번호를 남기지 않고 “저장 완료”만 표시
+    renderSavedNotice('resultsLotto', `${count}게임이 로또 기록에 저장되었습니다.`, 'lotto');
   }
 
-  // =========================
-  // 연금복권720+: 조 전략 템플릿
-  // =========================
+  // ===== 연금복권720+ =====
+  // 번호 형식 근거 [Source](https://www.dhlottery.co.kr/pt720/intro)
   function randomSixDigits(){
     let s=''; for(let i=0;i<6;i++) s+=String(randInt(0,9));
     return s;
-  }
-
-  function renderPensionResults(entries){
-    const box = document.getElementById('resultsPension');
-    box.innerHTML = '';
-    if(!entries.length){
-      box.innerHTML = `<div class="item"><div class="itemTitle">아직 결과가 없어요</div><div class="itemMeta">왼쪽에서 템플릿 버튼을 눌러주세요.</div></div>`;
-      return;
-    }
-
-    entries.forEach(e=>{
-      const favTxt = e.fav ? '★' : '☆';
-      const digits = e.digits.split('');
-      const el = document.createElement('div');
-      el.className = 'item';
-      el.innerHTML = `
-        <div class="itemTop">
-          <div>
-            <div class="itemTitle">${e.label} · ${e.group}조 ${e.digits}</div>
-            <div class="itemMeta">${new Date(e.ts).toLocaleString()} · 템플릿: <b>${e.template}</b></div>
-          </div>
-          <div class="actions">
-            <button class="iconBtn" onclick="toggleFav('pension','${e.id}')">${favTxt} 저장</button>
-            <button class="iconBtn" onclick="shareAsImage('pension','${e.id}')">이미지 공유</button>
-            <button class="iconBtn" onclick="deleteItem('pension','${e.id}')">삭제</button>
-          </div>
-        </div>
-        <div class="balls">
-          <div class="ball">${e.group}</div>
-          ${digits.map(d=>`<div class="ball">${d}</div>`).join('')}
-        </div>
-      `;
-      box.appendChild(el);
-    });
   }
 
   function generatePensionTickets(templateName, groupFn){
@@ -852,36 +737,32 @@ async function forceHardRefresh(){
     const entries = [];
     for(let i=0;i<count;i++){
       const entry = {
-        id: crypto.randomUUID(),
+        id: uuid(),
         type: 'pension',
         ts: nowISO(),
         group: groupFn(i, count),
         digits: randomSixDigits(),
         template: templateName,
-        fav:false,
-        label: `${i+1}매`
+        fav: false
       };
       pushHistory('pension', entry);
       entries.push(entry);
     }
+
     state.lastText = entries.map((e,i)=>`${i+1}) ${e.group}조 ${e.digits}`).join('\n');
-    renderPensionResults(entries);
+    renderSavedNotice('resultsPension', `${count}매가 연금 기록에 저장되었습니다.`, 'pension');
   }
 
   function generatePensionRandom(){
     generatePensionTickets('랜덤조', ()=>randInt(1,5));
   }
-
   function generatePensionFixed(){
     const fixed = parseInt(document.getElementById('pensionFixedGroup').value,10);
     generatePensionTickets(`조 고정(${fixed}조)`, ()=>fixed);
   }
-
   function generatePensionBalanced(){
-    // 1~5조 균등분배 (1,2,3,4,5,1,2,...)
-    generatePensionTickets('1~5조 균등분배', (i)=> (i % 5) + 1);
+    generatePensionTickets('1~5조 균등분배', (i)=> (i%5)+1);
   }
-
   function generatePensionSelectedRandom(){
     const selected = [];
     if(document.getElementById('g1').checked) selected.push(1);
@@ -889,7 +770,6 @@ async function forceHardRefresh(){
     if(document.getElementById('g3').checked) selected.push(3);
     if(document.getElementById('g4').checked) selected.push(4);
     if(document.getElementById('g5').checked) selected.push(5);
-
     if(selected.length===0){
       alert('선택된 조가 없어요. 최소 1개는 체크해 주세요.');
       return;
@@ -897,9 +777,7 @@ async function forceHardRefresh(){
     generatePensionTickets(`선택조 랜덤(${selected.join(',')}조)`, ()=> selected[randInt(0, selected.length-1)]);
   }
 
-  // =========================
-  // 기록 탭(로또/연금) 분리
-  // =========================
+  // ===== 기록 탭 =====
   function setHistoryTab(tab){
     state.historyTab = tab;
     document.getElementById('tabHLotto').classList.toggle('on', tab==='lotto');
@@ -920,39 +798,56 @@ async function forceHardRefresh(){
 
     arr.forEach(e=>{
       const favTxt = e.fav ? '★' : '☆';
-      const title = (type==='lotto') ? `${e.nums.join(', ')}` : `${e.group}조 ${e.digits}`;
+
+      let title = '';
+      let meta = '';
+      let analysisHtml = '';
+      if(type==='lotto'){
+        title = `로또 · ${e.nums.join(', ')}`;
+        meta = `${new Date(e.ts).toLocaleString()} · ${e.modeLabel}`;
+        const a = analyzeLotto(e.nums);
+        analysisHtml = `
+          <div class="analysis">
+            <b>번호 분석</b><br/>
+            합계 <b>${a.sum}</b> · 홀/짝 <b>${a.odd}:${a.even}</b> · 구간 <b>${a.low}/${a.mid}/${a.high}</b><br/>
+            연속수 <b>${a.consecutive ? '포함' : '없음'}</b> · 핫넘버 포함 <b>${a.hotIn}개</b>
+          </div>
+        `;
+      } else {
+        title = `연금 · ${e.group}조 ${e.digits}`;
+        meta = `${new Date(e.ts).toLocaleString()} · ${e.template}`;
+      }
+
       const el = document.createElement('div');
       el.className = 'item';
       el.innerHTML = `
         <div class="itemTop">
           <div>
             <div class="itemTitle">${title}</div>
-            <div class="itemMeta">${new Date(e.ts).toLocaleString()} · <b>${type==='lotto' ? e.modeLabel : e.template}</b></div>
+            <div class="itemMeta">${meta}</div>
           </div>
           <div class="actions">
             <button class="iconBtn" onclick="toggleFav('${type}','${e.id}')">${favTxt}</button>
-            <button class="iconBtn" onclick="shareAsImage('${type}','${e.id}')">이미지</button>
+            <button class="iconBtn" onclick="shareAsImage('${type}','${e.id}')">이미지 공유</button>
             <button class="iconBtn" onclick="deleteItem('${type}','${e.id}')">삭제</button>
           </div>
         </div>
+        ${analysisHtml}
       `;
       box.appendChild(el);
     });
   }
 
-  // =========================
-  // 내보내기/가져오기(JSON)
-  // =========================
+  // ===== 내보내기/가져오기 =====
   function exportData(){
     const data = {
       exportedAt: new Date().toISOString(),
+      version: 2,
       lotto: loadArr(KEY.lotto),
       pension: loadArr(KEY.pension),
-      version: 1
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement('a');
     a.href = url;
     a.download = `lotto_backup_${new Date().toISOString().slice(0,10)}.json`;
@@ -968,25 +863,20 @@ async function forceHardRefresh(){
     reader.onload = () => {
       try{
         const obj = JSON.parse(reader.result);
-        if(!obj || typeof obj !== 'object') throw new Error('형식 오류');
-
         const lotto = Array.isArray(obj.lotto) ? obj.lotto : [];
         const pension = Array.isArray(obj.pension) ? obj.pension : [];
 
-        // 기존 데이터와 합치기(중복 id는 덮어쓰지 않음)
+        // 현재 + 가져온 데이터 병합 (id 중복은 유지)
         const curL = loadArr(KEY.lotto);
         const curP = loadArr(KEY.pension);
 
-        const mergedL = mergeById(lotto, curL);
-        const mergedP = mergeById(pension, curP);
-
-        saveArr(KEY.lotto, mergedL.slice(0, 300));
-        saveArr(KEY.pension, mergedP.slice(0, 300));
+        saveArr(KEY.lotto, mergeById(curL, lotto).slice(0,300));
+        saveArr(KEY.pension, mergeById(curP, pension).slice(0,300));
 
         alert('가져오기 완료!');
         if(state.view==='history') renderHistory();
       }catch(e){
-        alert('가져오기 실패: 파일 형식이 맞는지 확인해 주세요.');
+        alert('가져오기 실패: JSON 형식이 맞는지 확인해 주세요.');
       } finally {
         ev.target.value = '';
       }
@@ -994,13 +884,11 @@ async function forceHardRefresh(){
     reader.readAsText(file);
   }
 
-  function mergeById(incoming, current){
+  function mergeById(a, b){
     const map = new Map();
-    current.forEach(x=>map.set(x.id, x));
-    incoming.forEach(x=>{
-      if(x && x.id && !map.has(x.id)) map.set(x.id, x);
-    });
-    return Array.from(map.values()).sort((a,b)=> (a.ts < b.ts ? 1 : -1));
+    a.forEach(x=>x?.id && map.set(x.id, x));
+    b.forEach(x=>x?.id && !map.has(x.id) && map.set(x.id, x));
+    return Array.from(map.values()).sort((x,y)=> (x.ts < y.ts ? 1 : -1));
   }
 
   function clearAllConfirm(){
@@ -1011,9 +899,7 @@ async function forceHardRefresh(){
     if(state.view==='history') renderHistory();
   }
 
-  // =========================
-  // 텍스트 복사
-  // =========================
+  // ===== 텍스트 복사 =====
   async function copyLastText(){
     if(!state.lastText){
       alert('복사할 결과가 아직 없어요. 먼저 생성해 주세요.');
@@ -1027,9 +913,7 @@ async function forceHardRefresh(){
     }
   }
 
-  // =========================
-  // 이미지 공유(공유 카드 PNG 생성)
-  // =========================
+  // ===== 이미지 공유(캔버스 카드) =====
   function findById(type, id){
     const arr = loadArr(type==='lotto' ? KEY.lotto : KEY.pension);
     return arr.find(x=>x.id===id);
@@ -1042,7 +926,8 @@ async function forceHardRefresh(){
     const blob = await renderShareCardBlob(type, item);
     const file = new File([blob], `${type}_${id}.png`, {type:'image/png'});
 
-    // Web Share(이미지 파일 공유) 가능하면 공유, 아니면 다운로드
+    // Web Share API 지원 시 공유 시트 (주로 모바일)
+    // [Source](https://developer.mozilla.org/en-US/docs/Web/API/Web_Share_API)
     if(navigator.canShare && navigator.canShare({files:[file]})){
       try{
         await navigator.share({
@@ -1052,11 +937,11 @@ async function forceHardRefresh(){
         });
         return;
       }catch(e){
-        // 사용자가 취소한 경우도 여기로 올 수 있음
+        // 사용자가 취소해도 여기로 올 수 있음
       }
     }
 
-    // fallback: 다운로드
+    // fallback: 다운로드(PC에서도 동작)
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -1073,7 +958,7 @@ async function forceHardRefresh(){
 
     // 배경
     const g = ctx.createLinearGradient(0,0,w,h);
-    g.addColorStop(0, '#070b18');
+    g.addColorStop(0, '#060913');
     g.addColorStop(1, '#0b1220');
     ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
 
@@ -1087,51 +972,43 @@ async function forceHardRefresh(){
     roundRect(ctx, 70, 110, 940, 1130, 40, 'rgba(255,255,255,.07)', 'rgba(255,255,255,.14)');
 
     ctx.fillStyle = '#eaf0ff';
-    ctx.font = '900 54px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    ctx.fillText('번호 생성기', 120, 220);
+    ctx.font = '950 54px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+    ctx.fillText('로또번호 생성기', 120, 220);
 
     ctx.fillStyle = 'rgba(232,240,255,.72)';
-    ctx.font = '700 30px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+    ctx.font = '850 30px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
     const sub = (type==='lotto') ? '로또 6/45' : '연금복권720+';
     ctx.fillText(sub, 120, 275);
 
-    // 날짜/메타
     ctx.fillStyle = 'rgba(232,240,255,.55)';
-    ctx.font = '700 26px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+    ctx.font = '750 26px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
     ctx.fillText(new Date(item.ts).toLocaleString(), 120, 330);
 
-    // 번호 그리기
     if(type==='lotto'){
-      const nums = item.nums;
-      drawBalls(ctx, nums.map(String), 120, 420, 6, 120);
-      // 분석
-      const a = analyzeLotto(nums);
+      drawBalls(ctx, item.nums.map(String), 120, 420, 6, 120);
+      const a = analyzeLotto(item.nums);
       ctx.fillStyle = 'rgba(232,240,255,.75)';
-      ctx.font = '800 30px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+      ctx.font = '900 30px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
       ctx.fillText('번호 분석', 120, 760);
       ctx.fillStyle = 'rgba(232,240,255,.62)';
-      ctx.font = '700 26px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+      ctx.font = '800 26px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
       ctx.fillText(`합계 ${a.sum} · 홀/짝 ${a.odd}:${a.even} · 구간 ${a.low}/${a.mid}/${a.high}`, 120, 810);
       ctx.fillText(`연속수 ${a.consecutive ? '포함' : '없음'} · 핫넘버 ${a.hotIn}개`, 120, 855);
-    }else{
-      const digits = item.digits.split('');
-      // group + digits 6개 => 7개 공
-      drawBalls(ctx, [String(item.group), ...digits], 120, 420, 4, 120);
+    } else {
+      drawBalls(ctx, [String(item.group), ...item.digits.split('')], 120, 420, 4, 120);
       ctx.fillStyle = 'rgba(232,240,255,.75)';
-      ctx.font = '800 30px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+      ctx.font = '900 30px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
       ctx.fillText('표기', 120, 760);
       ctx.fillStyle = 'rgba(232,240,255,.62)';
-      ctx.font = '700 26px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+      ctx.font = '800 26px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
       ctx.fillText(`${item.group}조 ${item.digits}`, 120, 810);
       ctx.fillText(`템플릿: ${item.template}`, 120, 855);
     }
 
-    // 하단 문구(오프라인 강조)
     ctx.fillStyle = 'rgba(232,240,255,.55)';
-    ctx.font = '700 24px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+    ctx.font = '800 24px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
     ctx.fillText('오프라인에서도 생성/기록/공유 가능', 120, 1150);
 
-    // PNG blob
     return await new Promise(res => c.toBlob(res, 'image/png', 0.92));
   }
 
@@ -1155,7 +1032,6 @@ async function forceHardRefresh(){
       const bx = x + col * gap;
       const by = y + row * gap;
 
-      // ball
       const grad = ctx.createRadialGradient(bx+38, by+34, 10, bx+55, by+55, 70);
       grad.addColorStop(0, 'rgba(255,255,255,.25)');
       grad.addColorStop(1, 'rgba(255,255,255,.06)');
@@ -1168,7 +1044,6 @@ async function forceHardRefresh(){
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // text
       ctx.fillStyle = '#eaf0ff';
       ctx.font = '1000 44px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
       const tw = ctx.measureText(t).width;
@@ -1176,49 +1051,56 @@ async function forceHardRefresh(){
     });
   }
 
-  // =========================
-  // 초기화
-  // =========================
+  // ===== 강제 새로고침(최신버전 적용) =====
+  // CacheStorage keys/delete [Source](https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage/keys) [Source](https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage/delete)
+  // Service Worker skipWaiting [Source](https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope/skipWaiting)
+  async function forceHardRefresh(){
+    const ok = confirm(
+      "최신 버전을 강제로 다시 받아옵니다.\n\n" +
+      "• 오프라인 캐시는 재생성될 수 있어요\n" +
+      "• 온라인 상태에서 실행을 권장합니다\n\n" +
+      "지금 적용할까요?"
+    );
+    if(!ok) return;
+
+    try{
+      if('serviceWorker' in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.update().catch(()=>{})));
+        regs.forEach(r => { if(r.waiting) r.waiting.postMessage({ type:'SKIP_WAITING' }); });
+      }
+
+      if('caches' in window){
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    }catch(e){
+      // 실패해도 다음 단계로 진행
+    }
+
+    // 캐시 우회 쿼리 + 현재 hash 유지
+    const base = location.origin + location.pathname;
+    const hash = location.hash || '#home';
+    location.replace(base + '?t=' + Date.now() + hash);
+  }
+
+  // ===== 서비스워커 등록 + 앱 시작 =====
   window.addEventListener('load', async () => {
     updateNetworkBadge();
-    setupServiceWorkerUpdateUI();
 
     if('serviceWorker' in navigator){
       try{
-        swReg = await navigator.serviceWorker.register('./sw.js');
-
-        // 이미 대기중(waiting)인 새 버전이 있으면 업데이트 배너 표시
-        if(swReg.waiting) showUpdateBar(true);
-
-        // 새 SW 설치 감지
-        swReg.addEventListener('updatefound', () => {
-          const installing = swReg.installing;
-          if(!installing) return;
-          installing.addEventListener('statechange', () => {
-            // 설치 완료 & 기존 컨트롤러가 있으면(=업데이트) 배너 띄움
-            if(installing.state === 'installed' && navigator.serviceWorker.controller){
-              showUpdateBar(true);
-            }
-          });
-        });
-      }catch(e){
-        // 등록 실패해도 앱은 동작
-      }
+        await navigator.serviceWorker.register('./sw.js');
+      }catch(e){}
     }
 
-    showHome();
+    // 초기 view: 해시 기반, 없으면 home
+    const initial = (location.hash || '#home').replace('#','') || 'home';
+    history.replaceState({view: initial}, '', '#'+initial);
+    setView(initial, {push:false});
   });
-</script>
-  <!-- 항상 보이는 하단 바 -->
-<div class="bottomBar">
-  <div class="bottomBarInner">
-    <div class="bottomBarText">
-      <b>최신버전 적용</b>
-      <span>업데이트가 안 보일 때 눌러주세요</span>
-    </div>
-    <button class="btn warn" onclick="forceHardRefresh()">최신버전 적용</button>
-  </div>
-</div>
 
+  // History API 설명 [Source](https://developer.mozilla.org/en-US/docs/Web/API/History_API)
+</script>
 </body>
 </html>
