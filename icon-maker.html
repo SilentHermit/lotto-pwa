@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>아이콘 생성기</title></head>
+<body style="font-family:system-ui; padding:16px;">
+  <h1>아이콘 생성기</h1>
+  <p>버튼으로 아이콘 PNG를 다운로드한 뒤 <b>icons</b> 폴더에 넣으세요.</p>
+  <canvas id="c" width="1024" height="1024" style="border:1px solid #ddd; border-radius:16px;"></canvas>
+  <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+    <button onclick="download(192,'icon-192.png')">192 다운로드</button>
+    <button onclick="download(512,'icon-512.png')">512 다운로드</button>
+    <button onclick="download(180,'apple-touch-icon.png')">180 다운로드</button>
+  </div>
+<script>
+function drawTo(canvas, size){
+  canvas.width=size; canvas.height=size;
+  const ctx=canvas.getContext("2d");
+  const g=ctx.createLinearGradient(0,0,size,size);
+  g.addColorStop(0,"#6ea8ff"); g.addColorStop(1,"#0b1220");
+  ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
+  ctx.fillStyle="rgba(255,255,255,0.18)";
+  ctx.beginPath(); const r=Math.round(size*0.14);
+  const x=size*0.10, y=size*0.12, w=size*0.80, h=size*0.76;
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.font=`800 ${Math.round(size*0.11)}px system-ui`;
+  ctx.fillText("로또번호", size/2, size*0.48);
+  ctx.fillText("생성기", size/2, size*0.60);
+  ctx.font=`700 ${Math.round(size*0.045)}px system-ui`;
+  ctx.fillStyle="rgba(255,255,255,0.85)";
+  ctx.fillText("6/45", size/2, size*0.73);
+}
+function download(size, filename){
+  const tmp=document.createElement("canvas");
+  drawTo(tmp,size);
+  tmp.toBlob((blob)=>{
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  },"image/png");
+}
+drawTo(document.getElementById("c"),1024);
+</script>
+</body>
+</html>
