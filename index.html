@@ -242,13 +242,32 @@
     }
     .bottomBarText{display:flex; flex-direction:column; gap:3px; min-width:0;}
     .bottomBarText b{font-size:13px; letter-spacing:-.2px}
-    .bottomBarText span{
-      font-size:12px;
-      color: rgba(232,240,255,.68);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+   .bottomBarText span{
+  font-size: 12px;
+  color: rgba(232,240,255,.68);
+
+  /* 기존의 nowrap/ellipsis 제거하고 2줄까지만 표시 */
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;      /* 최대 2줄 */
+  -webkit-box-orient: vertical;
+
+  line-height: 1.35;
+  max-width: 52ch;            /* 너무 길게 늘어지지 않게(선택) */
+}
+@media (max-width: 420px){
+  .bottomBarInner{
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .bottomBarText span{
+    max-width: none;              /* 좁은 화면에서는 제한 해제 */
+  }
+}
+
   </style>
 </head>
 
