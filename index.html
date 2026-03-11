@@ -198,6 +198,63 @@
     .updateTxt{font-size:12px; color:var(--text); font-weight:900; line-height:1.4}
     .updateTxt span{display:block; color:var(--muted); font-weight:700}
     a{color: var(--accent); text-decoration:none}
+    /* 하단 바가 콘텐츠를 가리지 않도록 여백 확보 */
+.wrap{
+  padding-bottom: 110px; /* bottomBar 높이만큼 */
+}
+
+/* 하단 고정 바 */
+.bottomBar{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); /* iPhone 홈바 영역 */
+  background: linear-gradient(180deg, rgba(7,11,24,0), rgba(7,11,24,.88) 30%, rgba(7,11,24,.96));
+  backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255,255,255,.10);
+  z-index: 999;
+}
+
+.bottomBarInner{
+  max-width: 940px;
+  margin: 0 auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 18px 40px rgba(0,0,0,.35);
+}
+
+.bottomBarText{
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.bottomBarText b{
+  font-size: 13px;
+  letter-spacing: -0.2px;
+}
+.bottomBarText span{
+  font-size: 12px;
+  color: rgba(232,240,255,.68);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 버튼 살짝 고급스럽게 */
+.btn{
+  box-shadow: 0 10px 22px rgba(0,0,0,.22);
+}
+@media (hover:hover){
+  .btn:hover{ transform: translateY(-1px); }
+}
+.btn:active{ transform: translateY(0) scale(.98); }
+
   </style>
 </head>
 
@@ -447,6 +504,40 @@
         swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
     });
+async function forceHardRefresh(){
+  const ok = confirm(
+    "최신 버전을 강제로 다시 받아옵니다.\n\n" +
+    "• 오프라인 캐시가 새로 채워질 수 있어요\n" +
+    "• 인터넷 연결 상태에서 실행을 권장합니다\n\n" +
+    "지금 적용할까요?"
+  );
+  if(!ok) return;
+
+  try{
+    // 1) 서비스워커 업데이트 체크
+    if('serviceWorker' in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.update().catch(()=>{})));
+
+      // 2) 혹시 waiting(대기중인 새 버전)이 있으면 즉시 활성화 시도
+      regs.forEach(r => {
+        if(r.waiting) r.waiting.postMessage({ type:'SKIP_WAITING' });
+      });
+    }
+
+    // 3) 캐시 스토리지(오프라인 캐시) 삭제
+    if('caches' in window){
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  }catch(e){
+    // 실패해도 아래 단계로 진행
+  }
+
+  // 4) 캐시 무시용 쿼리로 강제 재진입 (서비스워커/브라우저 캐시 우회)
+  const base = location.origin + location.pathname; // 쿼리/해시 제거
+  location.replace(base + "?t=" + Date.now());
+}
 
     // 새 SW가 활성화되면 자동 새로고침
     navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -1119,5 +1210,16 @@
     showHome();
   });
 </script>
+  <!-- 항상 보이는 하단 바 -->
+<div class="bottomBar">
+  <div class="bottomBarInner">
+    <div class="bottomBarText">
+      <b>최신버전 적용</b>
+      <span>업데이트가 안 보일 때 눌러주세요</span>
+    </div>
+    <button class="btn warn" onclick="forceHardRefresh()">최신버전 적용</button>
+  </div>
+</div>
+
 </body>
 </html>
