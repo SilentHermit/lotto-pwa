@@ -229,6 +229,34 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    /* 기록 화면: 최근 생성 하이라이트 */
+.sectionTitle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin: 4px 0 10px;
+}
+.sectionTitle .left{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.recentPill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: linear-gradient(135deg, rgba(255,209,102,.18), rgba(121,167,255,.14));
+  color: rgba(232,240,255,.92);
+  font-size:12px;
+  font-weight:950;
+}
+.item.recent{
+  border-color: rgba(255,209,102,.22);
+  background: linear-gradient(135deg, rgba(255,209,102,.08), rgba(121,167,255,.06));
+}
+
   </style>
 </head>
 
@@ -786,57 +814,99 @@
   }
 
   function renderHistory(){
-    const box = document.getElementById('historyList');
-    const type = state.historyTab;
-    const arr = loadArr(type==='lotto' ? KEY.lotto : KEY.pension);
+ function historyItemHTML(type, e, isRecent){
+  const favTxt = e.fav ? '★' : '☆';
 
-    box.innerHTML = '';
-    if(!arr.length){
-      box.innerHTML = `<div class="item"><div class="itemTitle">기록이 비어있어요</div><div class="itemMeta">생성하면 자동으로 기록됩니다.</div></div>`;
-      return;
-    }
+  let title = '';
+  let meta = '';
+  let analysisHtml = '';
 
-    arr.forEach(e=>{
-      const favTxt = e.fav ? '★' : '☆';
-
-      let title = '';
-      let meta = '';
-      let analysisHtml = '';
-      if(type==='lotto'){
-        title = `로또 · ${e.nums.join(', ')}`;
-        meta = `${new Date(e.ts).toLocaleString()} · ${e.modeLabel}`;
-        const a = analyzeLotto(e.nums);
-        analysisHtml = `
-          <div class="analysis">
-            <b>번호 분석</b><br/>
-            합계 <b>${a.sum}</b> · 홀/짝 <b>${a.odd}:${a.even}</b> · 구간 <b>${a.low}/${a.mid}/${a.high}</b><br/>
-            연속수 <b>${a.consecutive ? '포함' : '없음'}</b> · 핫넘버 포함 <b>${a.hotIn}개</b>
-          </div>
-        `;
-      } else {
-        title = `연금 · ${e.group}조 ${e.digits}`;
-        meta = `${new Date(e.ts).toLocaleString()} · ${e.template}`;
-      }
-
-      const el = document.createElement('div');
-      el.className = 'item';
-      el.innerHTML = `
-        <div class="itemTop">
-          <div>
-            <div class="itemTitle">${title}</div>
-            <div class="itemMeta">${meta}</div>
-          </div>
-          <div class="actions">
-            <button class="iconBtn" onclick="toggleFav('${type}','${e.id}')">${favTxt}</button>
-            <button class="iconBtn" onclick="shareAsImage('${type}','${e.id}')">이미지 공유</button>
-            <button class="iconBtn" onclick="deleteItem('${type}','${e.id}')">삭제</button>
-          </div>
-        </div>
-        ${analysisHtml}
-      `;
-      box.appendChild(el);
-    });
+  if(type === 'lotto'){
+    title = `로또 · ${e.nums.join(', ')}`;
+    meta = `${new Date(e.ts).toLocaleString()} · ${e.modeLabel}`;
+    const a = analyzeLotto(e.nums);
+    analysisHtml = `
+      <div class="analysis">
+        <b>번호 분석</b><br/>
+        합계 <b>${a.sum}</b> · 홀/짝 <b>${a.odd}:${a.even}</b> · 구간 <b>${a.low}/${a.mid}/${a.high}</b><br/>
+        연속수 <b>${a.consecutive ? '포함' : '없음'}</b> · 핫넘버 포함 <b>${a.hotIn}개</b>
+      </div>
+    `;
+  } else {
+    title = `연금 · ${e.group}조 ${e.digits}`;
+    meta = `${new Date(e.ts).toLocaleString()} · ${e.template}`;
   }
+
+  return `
+    <div class="item ${isRecent ? 'recent' : ''}">
+      <div class="itemTop">
+        <div>
+          <div class="itemTitle">${isRecent ? '<span class="recentPill">최근 생성</span> ' : ''}${title}</div>
+          <div class="itemMeta">${meta}</div>
+        </div>
+        <div class="actions">
+          <button class="iconBtn" onclick="toggleFav('${type}','${e.id}')">${favTxt}</button>
+          <button class="iconBtn" onclick="shareAsImage('${type}','${e.id}')">이미지 공유</button>
+          <button class="iconBtn" onclick="deleteItem('${type}','${e.id}')">삭제</button>
+        </div>
+      </div>
+      ${analysisHtml}
+    </div>
+  `;
+}
+
+function renderHistory(){
+  const box = document.getElementById('historyList');
+  const type = state.historyTab;
+  const arr = loadArr(type === 'lotto' ? KEY.lotto : KEY.pension);
+
+  box.innerHTML = '';
+
+  if(!arr.length){
+    box.innerHTML = `
+      <div class="item">
+        <div class="itemTitle">기록이 비어있어요</div>
+        <div class="itemMeta">생성하면 자동으로 기록됩니다.</div>
+      </div>
+    `;
+    return;
+  }
+
+  // 상단 하이라이트: 최근 5개
+  const recent = arr.slice(0, 5);
+  const rest = arr.slice(5);
+
+  const recentHtml = `
+    <div class="sectionTitle">
+      <div class="left">
+        <span class="recentPill">최근 생성 ${recent.length}개 (최대 5)</span>
+        <span class="pill">탭(${type === 'lotto' ? '로또' : '연금'}) 기준</span>
+      </div>
+      <span class="pill">아래 목록에는 중복 표시하지 않음</span>
+    </div>
+    ${recent.map(e => historyItemHTML(type, e, true)).join('')}
+  `;
+
+  const restHtml = rest.length ? `
+    <div style="height:12px"></div>
+    <div class="sectionTitle">
+      <div class="left">
+        <span class="pill">전체 기록</span>
+        <span class="pill">총 ${arr.length}개</span>
+      </div>
+    </div>
+    ${rest.map(e => historyItemHTML(type, e, false)).join('')}
+  ` : `
+    <div style="height:12px"></div>
+    <div class="item">
+      <div class="itemTitle">전체 기록</div>
+      <div class="itemMeta">현재는 최근 5개만 있어요.</div>
+    </div>
+  `;
+
+  box.innerHTML = recentHtml + restHtml;
+}
+
 
   // ===== 내보내기/가져오기 =====
   function exportData(){
