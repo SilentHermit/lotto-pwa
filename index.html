@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <title>로또번호 생성기</title>
+
+  <!-- PWA Manifest (설치 정보) -->
+  <link rel="manifest" href="./manifest.webmanifest" />
+
+  <!-- iOS 홈 화면 앱처럼 보이게 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="로또번호 생성기" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+  <!-- iOS 홈 화면 아이콘(apple-touch-icon은 iOS에서 우선될 수 있음) -->
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+
+<!-- (권장) 모바일 기본 설정 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220" />
+
+  <style>
+    body { margin:0; font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; background:#0b1220; color:#eaf0ff; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 18px; }
+    .card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 14px; padding: 14px; }
+    button { width:100%; padding: 12px; border-radius: 12px; border:0; font-weight: 800; background: #6ea8ff; color:#06111f; cursor:pointer; }
+    .grid { display:grid; gap:10px; }
+    .nums { display:flex; flex-wrap:wrap; gap:8px; }
+    .ball { width:40px; height:40px; border-radius:999px; display:grid; place-items:center; font-weight:900; background: rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.16); }
+    .muted { color: rgba(234,240,255,0.70); font-size: 13px; line-height:1.4; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 style="margin:0 0 10px;">로또번호 생성기</h1>
+    <p class="muted" style="margin:0 0 14px;">
+      참고: 과거 통계는 당첨을 보장하지 않습니다. (iOS 홈 화면에 추가하면 앱처럼 실행 가능)
+    </p>
+
+    <div class="card grid">
+      <button id="gen">번호 1게임 생성</button>
+      <div id="out" class="nums" aria-label="생성 결과"></div>
+      <div class="muted" id="hint"></div>
+    </div>
+
+    <p class="muted" style="margin-top:14px;">
+      iPhone 설치: Safari → 공유 버튼(⬆︎) → “홈 화면에 추가”
+    </p>
+  </div>
+
+  <script>
+    // --- 간단 번호 생성(원하시면 이전에 만든 Hot 가중치 로직으로 교체 가능) ---
+    function genOneSet() {
+      const s = new Set();
+      while (s.size < 6) s.add(1 + Math.floor(Math.random() * 45));
+      return Array.from(s).sort((a,b)=>a-b);
+    }
+
+    function render(nums) {
+      const out = document.getElementById("out");
+      out.innerHTML = nums.map(n => `<div class="ball">${n}</div>`).join("");
+      document.getElementById("hint").textContent = "생성됨: " + nums.join(", ");
+    }
+
+    document.getElementById("gen").addEventListener("click", () => render(genOneSet()));
+    render(genOneSet());
+
+    // --- Service Worker 등록(오프라인 핵심) ---
+    // PWA는 HTTPS(또는 localhost)에서 설치/오프라인이 안정적으로 동작합니다. [Source]
+    // https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js");
+      });
+    }
+  </script>
+</body>
+</html>
