@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
 
-  <!-- iOS 홈화면(웹앱)용 -->
+  <!-- iOS 홈화면(웹앱) -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="로또번호 생성기">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -17,19 +17,21 @@
     :root{
       --bg:#0b1220; --card:#101a33; --text:#e8eefc; --muted:#a8b3d6;
       --accent:#6ea8fe; --line:rgba(255,255,255,.12);
+      --good:#44d19d; --warn:#ffd166;
     }
     body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Apple SD Gothic Neo,Noto Sans KR,sans-serif; background:var(--bg); color:var(--text);}
-    header{padding:18px 16px 10px; position:sticky; top:0; background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.65)); backdrop-filter: blur(10px); border-bottom:1px solid var(--line);}
+    header{padding:18px 16px 10px; position:sticky; top:0; background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.65)); backdrop-filter: blur(10px); border-bottom:1px solid var(--line); z-index:10;}
     h1{margin:0; font-size:18px;}
-    .wrap{padding:14px 16px 40px; max-width:720px; margin:0 auto;}
+    .wrap{padding:14px 16px 40px; max-width:760px; margin:0 auto;}
     .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0;}
-    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;}
     .btn{appearance:none; border:1px solid var(--line); background:#0f1a36; color:var(--text);
-      padding:12px 14px; border-radius:12px; font-weight:700; cursor:pointer;}
+      padding:12px 14px; border-radius:12px; font-weight:800; cursor:pointer;}
     .btn.primary{background:var(--accent); color:#081227; border-color:transparent;}
-    .btn.ghost{background:transparent;}
+    .btn.good{background:var(--good); color:#052016; border-color:transparent;}
     .btn.full{width:100%;}
-    label{font-size:13px; color:var(--muted);}
+    .btn.ghost{background:transparent;}
+    label{font-size:12px; color:var(--muted);}
     input, select{
       background:#0f1a36; border:1px solid var(--line); color:var(--text);
       padding:10px 12px; border-radius:12px; font-size:15px;
@@ -42,11 +44,13 @@
     .balls{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
     .ball{
       width:38px; height:38px; border-radius:999px; display:flex; align-items:center; justify-content:center;
-      font-weight:800; background:#15224b; border:1px solid rgba(255,255,255,.10);
+      font-weight:900; background:#15224b; border:1px solid rgba(255,255,255,.10);
     }
-    .meta{font-size:12px; color:var(--muted); margin-top:6px; line-height:1.45;}
+    .meta{font-size:12px; color:var(--muted); margin-top:6px; line-height:1.55;}
     .topActions{display:flex; gap:10px; align-items:center; justify-content:space-between;}
     .small{font-size:12px; color:var(--muted);}
+    .hr{height:1px; background:var(--line); margin:12px 0;}
+    .tag{display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; border:1px solid var(--line); color:var(--muted);}
   </style>
 </head>
 
@@ -54,7 +58,7 @@
   <header>
     <div class="topActions">
       <h1 id="appTitle">번호 생성기</h1>
-      <button class="btn ghost" id="btnBack" onclick="showHome()" aria-label="뒤로" title="뒤로">처음</button>
+      <button class="btn ghost" id="btnBack" onclick="showHome()" title="처음으로">처음</button>
     </div>
     <div class="small" id="subtitle">원하는 복권을 선택하세요</div>
   </header>
@@ -68,36 +72,60 @@
         <button class="btn full" onclick="selectMode('pension')">연금복권720+ 생성기</button>
       </div>
       <p class="meta">
-        참고: 로또/연금복권 모두 추첨은 독립 사건이라 “과거 당첨번호”가 다음 당첨 확률을 올리진 않습니다. 재미로 사용해 주세요.
+        안내: 추첨은 독립 사건이라 과거 출현 빈도가 다음 당첨 확률을 “보장”하진 않습니다. 다만 요청하신 “핫넘버 기반 가중치/혼합” 방식은 재미용으로 제공해요.
+        <span class="tag">오프라인 지원</span>
       </p>
     </section>
 
-    <!-- 로또 생성기 -->
+    <!-- 로또 생성기 (핫/가중치/혼합/랜덤) -->
     <section id="viewLotto" class="card hidden">
       <div class="row">
         <div>
-          <label>생성 게임 수</label><br/>
+          <label>생성 게임 수 (1~20)</label><br/>
           <input id="lottoCount" type="number" min="1" max="20" value="5" />
         </div>
-        <button class="btn primary" onclick="generate('lotto')">로또 생성</button>
+
+        <div>
+          <label>모드</label><br/>
+          <select id="lottoMode" onchange="onLottoModeChanged()">
+            <option value="weighted" selected>가중치(핫 기반)</option>
+            <option value="mix">혼합(핫 K개 + 랜덤)</option>
+            <option value="uniform">완전 랜덤</option>
+          </select>
+        </div>
+
+        <div id="mixHotBox">
+          <label>혼합: 핫 개수 K (0~6)</label><br/>
+          <input id="mixHotCount" type="number" min="0" max="6" value="4" />
+        </div>
+
+        <button class="btn good" onclick="generateLotto()">로또 생성</button>
         <button class="btn" onclick="copyResults()">결과 복사</button>
       </div>
-      <div class="pill">로또 6/45 · 1~45 중 6개(중복 없음)</div>
+
+      <div class="pill">
+        핫넘버 TOP15 출현횟수 기반 (Lottolyzer) ·
+        <a href="https://kr.lottolyzer.com/home/south-korea/6_slash_45-lotto/summary-view" target="_blank" style="color:var(--accent); text-decoration:none;">출처 보기</a>
+      </div>
+
+      <p class="meta">
+        가중치 모드: TOP15의 출현횟수를 1~5 가중치로 스케일링하여(나머지는 1) 뽑습니다. [Source](https://kr.lottolyzer.com/home/south-korea/6_slash_45-lotto/summary-view)
+      </p>
+
       <div id="resultsLotto" class="results"></div>
     </section>
 
-    <!-- 연금복권 생성기 -->
+    <!-- 연금복권 생성기 (랜덤조/조고정 두 버전) -->
     <section id="viewPension" class="card hidden">
       <div class="row">
         <div>
-          <label>생성 매수</label><br/>
+          <label>생성 매수 (1~20)</label><br/>
           <input id="pensionCount" type="number" min="1" max="20" value="5" />
         </div>
 
         <div>
-          <label>조 선택</label><br/>
-          <select id="pensionGroup">
-            <option value="random" selected>랜덤(1~5조)</option>
+          <label>조(고정 버전에서 사용)</label><br/>
+          <select id="pensionFixedGroup">
             <option value="1">1조</option>
             <option value="2">2조</option>
             <option value="3">3조</option>
@@ -106,31 +134,37 @@
           </select>
         </div>
 
-        <button class="btn primary" onclick="generate('pension')">연금복권 생성</button>
+        <button class="btn primary" onclick="generatePensionRandom()">연금 생성 (랜덤조)</button>
+        <button class="btn" onclick="generatePensionFixed()">연금 생성 (조 고정)</button>
+
         <button class="btn" onclick="copyResults()">결과 복사</button>
       </div>
 
-      <div class="pill">연금복권720+ · 1조 000000 ~ 5조 999999 범위</div>
+      <div class="pill">
+        1조 000000 ~ 5조 999999 형식
+        · <a href="https://www.dhlottery.co.kr/pt720/intro" target="_blank" style="color:var(--accent); text-decoration:none;">공식 안내</a>
+      </div>
+
       <p class="meta">
-        공식 안내: “1조 000000 ~ 5조 999999” 중 선택한 번호와 추첨번호가 끝자리부터 연속 일치 개수에 따라 당첨이 결정됩니다. [Source](https://www.dhlottery.co.kr/pt720/intro)
+        연금복권720+는 “조(1~5) + 6자리(000000~999999)” 조합입니다. [Source](https://www.dhlottery.co.kr/pt720/intro)
       </p>
+
+      <div class="hr"></div>
       <div id="resultsPension" class="results"></div>
     </section>
 
   </div>
 
 <script>
-  // ---------- 공통 UI ----------
-  const state = {
-    mode: null,        // 'lotto' | 'pension'
-    lastText: ''       // 복사/공유용 텍스트
-  };
+  // =========================
+  // 상태 / 공통
+  // =========================
+  const state = { mode: null, lastText: '' };
 
   function showHome(){
     state.mode = null;
     document.getElementById('appTitle').textContent = '번호 생성기';
     document.getElementById('subtitle').textContent = '원하는 복권을 선택하세요';
-
     document.getElementById('viewHome').classList.remove('hidden');
     document.getElementById('viewLotto').classList.add('hidden');
     document.getElementById('viewPension').classList.add('hidden');
@@ -138,23 +172,18 @@
 
   function selectMode(mode){
     state.mode = mode;
-
     document.getElementById('viewHome').classList.add('hidden');
     document.getElementById('viewLotto').classList.toggle('hidden', mode !== 'lotto');
     document.getElementById('viewPension').classList.toggle('hidden', mode !== 'pension');
 
     if(mode === 'lotto'){
       document.getElementById('appTitle').textContent = '로또번호 생성기';
-      document.getElementById('subtitle').textContent = '6/45 자동번호 생성';
+      document.getElementById('subtitle').textContent = '핫/가중치/혼합/랜덤 생성';
+      onLottoModeChanged();
     } else {
       document.getElementById('appTitle').textContent = '연금복권720+ 생성기';
-      document.getElementById('subtitle').textContent = '조 + 6자리 자동번호 생성';
+      document.getElementById('subtitle').textContent = '랜덤조 버전 + 조고정 버전';
     }
-  }
-
-  function generate(which){
-    if(which === 'lotto') generateLotto();
-    else generatePension();
   }
 
   async function copyResults(){
@@ -166,22 +195,96 @@
       await navigator.clipboard.writeText(state.lastText);
       alert('복사 완료! 원하는 곳에 붙여넣기 하세요.');
     }catch(e){
-      // iOS에서 clipboard 권한이 까다로운 경우 대비
       prompt('아래 내용을 길게 눌러 복사하세요:', state.lastText);
     }
   }
 
-  // ---------- 로또 생성 ----------
-  function generateLottoOneSet(){
-    // 기본 랜덤: 1~45 중 6개 중복 없이
-    const s = new Set();
-    while(s.size < 6){
-      s.add(randInt(1,45));
-    }
-    return Array.from(s).sort((a,b)=>a-b);
+  function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  function clampInt(v, min, max, fallback){
+    const n = parseInt(v,10);
+    if(Number.isNaN(n)) return fallback;
+    return Math.max(min, Math.min(max, n));
   }
 
-  function renderLottoSets(sets){
+  // =========================
+  // 로또: 핫넘버(출현횟수) 기반 가중치
+  // - 출처: Lottolyzer TOP15 (출현횟수)
+  // =========================
+  // [Source] https://kr.lottolyzer.com/home/south-korea/6_slash_45-lotto/summary-view
+  const HOT_COUNTS = new Map([
+    [12,147],[34,143],[38,142],[27,141],[13,141],
+    [33,137],[45,137],[18,134],[16,133],[15,132],
+    [7,132],[14,132],[17,131],[20,131],[1,130]
+  ]);
+
+  function getWeight(num){
+    // 기본 1
+    if(!HOT_COUNTS.has(num)) return 1;
+
+    // TOP15 출현횟수를 1~5로 스케일링 (과도한 편향 방지)
+    const counts = Array.from(HOT_COUNTS.values());
+    const min = Math.min(...counts);
+    const max = Math.max(...counts);
+    const c = HOT_COUNTS.get(num);
+
+    if(max === min) return 5;
+    const t = (c - min) / (max - min);     // 0~1
+    const w = 1 + t * 4;                   // 1~5
+    return w;
+  }
+
+  function weightedPickOne(availableNums){
+    // availableNums: 숫자 배열 (중복 없음)
+    const weights = availableNums.map(n => getWeight(n));
+    const total = weights.reduce((a,b)=>a+b, 0);
+    let r = Math.random() * total;
+    for(let i=0;i<availableNums.length;i++){
+      r -= weights[i];
+      if(r <= 0) return availableNums[i];
+    }
+    return availableNums[availableNums.length-1];
+  }
+
+  function generateLottoOneSet(mode, mixHotCount){
+    const chosen = new Set();
+
+    if(mode === 'uniform'){
+      while(chosen.size < 6) chosen.add(randInt(1,45));
+      return Array.from(chosen).sort((a,b)=>a-b);
+    }
+
+    if(mode === 'weighted'){
+      // 1~45 전체에서 가중치(핫은 1~5, 나머지 1)로 6개 비복원 추출
+      let available = Array.from({length:45}, (_,i)=>i+1);
+      while(chosen.size < 6){
+        const pick = weightedPickOne(available);
+        chosen.add(pick);
+        available = available.filter(n => n !== pick);
+      }
+      return Array.from(chosen).sort((a,b)=>a-b);
+    }
+
+    // mix: 핫 K개(가중치) + 나머지 (완전랜덤)
+    const hotList = Array.from(HOT_COUNTS.keys());
+    const k = clampInt(mixHotCount, 0, 6, 4);
+
+    // 1) 핫에서 K개 (핫 내부에서 가중치로 비복원)
+    let hotAvail = hotList.slice();
+    while(chosen.size < k && hotAvail.length){
+      const pick = weightedPickOne(hotAvail);
+      chosen.add(pick);
+      hotAvail = hotAvail.filter(n => n !== pick);
+    }
+
+    // 2) 나머지 6-K개는 전체(1~45)에서 랜덤(중복 방지)
+    while(chosen.size < 6){
+      chosen.add(randInt(1,45));
+    }
+
+    return Array.from(chosen).sort((a,b)=>a-b);
+  }
+
+  function renderLottoSets(sets, mode){
     const box = document.getElementById('resultsLotto');
     box.innerHTML = '';
     sets.forEach((nums, idx)=>{
@@ -190,31 +293,66 @@
       item.innerHTML = `
         <div><b>${idx+1}게임</b> · <span class="small">${nums.join(', ')}</span></div>
         <div class="balls">${nums.map(n=>`<div class="ball">${n}</div>`).join('')}</div>
+        <div class="meta">모드: <b>${modeLabel(mode)}</b></div>
       `;
       box.appendChild(item);
     });
   }
 
+  function modeLabel(m){
+    if(m === 'weighted') return '가중치(핫 기반)';
+    if(m === 'mix') return '혼합(핫+랜덤)';
+    return '완전 랜덤';
+  }
+
+  function onLottoModeChanged(){
+    const mode = document.getElementById('lottoMode').value;
+    document.getElementById('mixHotBox').classList.toggle('hidden', mode !== 'mix');
+  }
+
   function generateLotto(){
     const count = clampInt(document.getElementById('lottoCount').value, 1, 20, 5);
-    const sets = [];
-    for(let i=0; i<count; i++) sets.push(generateLottoOneSet());
-    renderLottoSets(sets);
+    const mode = document.getElementById('lottoMode').value;
+    const mixHotCount = document.getElementById('mixHotCount').value;
 
-    // 복사용 텍스트
+    const sets = [];
+    for(let i=0;i<count;i++){
+      sets.push(generateLottoOneSet(mode, mixHotCount));
+    }
+    renderLottoSets(sets, mode);
     state.lastText = sets.map((a,i)=>`${i+1}) ${a.join(', ')}`).join('\n');
   }
 
-  // ---------- 연금복권 생성 ----------
-  function generatePensionOne(){
-    const groupSel = document.getElementById('pensionGroup').value;
-    const group = (groupSel === 'random') ? randInt(1,5) : parseInt(groupSel,10);
+  // =========================
+  // 연금복권720+: 랜덤조 / 조고정 (2버전)
+  // =========================
+  function randomSixDigits(){
+    let s = '';
+    for(let i=0;i<6;i++) s += String(randInt(0,9));
+    return s;
+  }
 
-    // 6자리(000000~999999) : 각 자리 0~9
-    let digits = '';
-    for(let i=0;i<6;i++) digits += String(randInt(0,9));
+  function generatePensionTickets(getGroupFn){
+    const count = clampInt(document.getElementById('pensionCount').value, 1, 20, 5);
+    const list = [];
+    for(let i=0;i<count;i++){
+      const group = getGroupFn();
+      const digits = randomSixDigits();
+      list.push({group, digits});
+    }
+    renderPension(list);
+    state.lastText = list.map((t,i)=>`${i+1}) ${t.group}조 ${t.digits}`).join('\n');
+  }
 
-    return { group, digits };
+  function generatePensionRandom(){
+    // 버전 A: 랜덤조
+    generatePensionTickets(()=> randInt(1,5));
+  }
+
+  function generatePensionFixed(){
+    // 버전 B: 조 고정
+    const fixed = parseInt(document.getElementById('pensionFixedGroup').value,10);
+    generatePensionTickets(()=> fixed);
   }
 
   function renderPension(list){
@@ -234,31 +372,14 @@
     });
   }
 
-  function generatePension(){
-    const count = clampInt(document.getElementById('pensionCount').value, 1, 20, 5);
-    const list = [];
-    for(let i=0; i<count; i++) list.push(generatePensionOne());
-    renderPension(list);
-
-    state.lastText = list.map((t,i)=>`${i+1}) ${t.group}조 ${t.digits}`).join('\n');
-  }
-
-  // ---------- 유틸 ----------
-  function randInt(min, max){
-    return Math.floor(Math.random()*(max-min+1))+min;
-  }
-  function clampInt(v, min, max, fallback){
-    const n = parseInt(v,10);
-    if(Number.isNaN(n)) return fallback;
-    return Math.max(min, Math.min(max, n));
-  }
-
-  // ---------- Service Worker 등록 ----------
+  // =========================
+  // Service Worker 등록
+  // =========================
   window.addEventListener('load', () => {
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register('./sw.js').catch(()=>{});
     }
-    showHome(); // 첫 화면은 선택 화면
+    showHome();
   });
 </script>
 </body>
