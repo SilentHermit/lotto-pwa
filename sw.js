@@ -1,5 +1,5 @@
 // 배포할 때마다 버전만 올리세요 (업데이트 트리거가 확실해짐)
-const CACHE = "lotto-pwa-nav-v2";
+const CACHE = "lotto-pwa-nav-v3";
 
 const CORE_ASSETS = [
   "./",
